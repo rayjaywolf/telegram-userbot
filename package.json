@@ -1,0 +1,23 @@
+{
+  "name": "telegram-logger",
+  "version": "1.0.0",
+  "description": "A Telegram userbot to log messages from a specific chat.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "telegram",
+    "userbot",
+    "nodejs"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.11.0",
+    "dotenv": "^16.4.5",
+    "input": "^1.0.1",
+    "telegram": "^2.22.1"
+  }
+}
