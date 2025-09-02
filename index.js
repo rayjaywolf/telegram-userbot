@@ -74,8 +74,8 @@ async function getPairAddress(tokenAddress) {
   }
 }
 
-async function sendToDiscord(info, pairAddress) {
-  if (!info || !pairAddress) return;
+async function sendToDiscord(info, pairAddress = null) {
+  if (!info) return;
 
   const pad = (str) => str.padEnd(11, " ");
 
@@ -86,11 +86,20 @@ async function sendToDiscord(info, pairAddress) {
     `\`${pad("Top 10")}\` ${info.top10}`,
   ].join("\n");
 
-  const linksValue = [
-    `[Axiom](https://axiom.trade/meme/${pairAddress}/@gravy)`,
-    `[DexScreener](https://dexscreener.com/solana/${info.ca})`,
-    `[Solscan](https://solscan.io/token/${info.ca})`,
-  ].join(" • ");
+  // Create links based on whether we have a pair address or not
+  let linksValue;
+  if (pairAddress) {
+    linksValue = [
+      `[Axiom](https://axiom.trade/meme/${pairAddress}/@gravy)`,
+      `[DexScreener](https://dexscreener.com/solana/${info.ca})`,
+      `[Solscan](https://solscan.io/token/${info.ca})`,
+    ].join(" • ");
+  } else {
+    linksValue = [
+      `[DexScreener](https://dexscreener.com/solana/${info.ca})`,
+      `[Solscan](https://solscan.io/token/${info.ca})`,
+    ].join(" • ");
+  }
 
   const embed = {
     color: 0x9046ff,
@@ -113,6 +122,15 @@ async function sendToDiscord(info, pairAddress) {
     ],
     timestamp: new Date().toISOString(),
   };
+
+  // Add a note if pair address wasn't found
+  if (!pairAddress) {
+    embed.fields.push({
+      name: "⚠️ Note",
+      value: "Pair address not found - Axiom link unavailable",
+      inline: false,
+    });
+  }
 
   try {
     await axios.post(discordWebhookUrl, {
@@ -218,11 +236,12 @@ async function startUserbot() {
             await sendToDiscord(info, pairAddress);
           } else {
             logToFile(
-              `Could not find pair address for ${info.ca}. Skipping Discord forward.`
+              `Could not find pair address for ${info.ca}. Sending Discord embed without pair address.`
             );
             console.log(
-              "Could not find pair address. Message will not be forwarded."
+              "Could not find pair address. Sending Discord embed without pair address."
             );
+            await sendToDiscord(info);
           }
         } else {
           logToFile(
